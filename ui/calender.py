@@ -124,19 +124,23 @@ class CalendarWidget(QWidget):
         nav = QHBoxLayout()
         self.prev_btn = QPushButton("◀")
         self.next_btn = QPushButton("▶")
+        self.today_btn = QPushButton("오늘")
         self.month_label = QLabel()
         self.month_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.month_label.setFont(QFont("NanumSquare Neo OTF", 16, QFont.Weight.Bold))
 
         self.prev_btn.setFixedSize(44, 36)
         self.next_btn.setFixedSize(44, 36)
+        self.today_btn.setFixedSize(48, 28)
         self.prev_btn.clicked.connect(self._prev_month)
         self.next_btn.clicked.connect(self._next_month)
+        self.today_btn.clicked.connect(self._go_today)
         self._update_nav_style()
 
         nav.addWidget(self.prev_btn)
         nav.addWidget(self.month_label)
         nav.addWidget(self.next_btn)
+        nav.addWidget(self.today_btn)
 
         self.grid = QGridLayout()
         self.grid.setSpacing(4)
@@ -207,6 +211,13 @@ class CalendarWidget(QWidget):
             self.current_month += 1
         self.refresh()
 
+    def _go_today(self):
+        self.current_year  = self.today.year
+        self.current_month = self.today.month
+        self.selected_date = self.today
+        self.refresh()
+        self.date_clicked.emit(self.today)
+
     def _update_nav_style(self):
         t = self.theme
         style = f"""
@@ -227,6 +238,21 @@ class CalendarWidget(QWidget):
         """
         self.prev_btn.setStyleSheet(style)
         self.next_btn.setStyleSheet(style)
+        self.today_btn.setStyleSheet(f"""
+            QPushButton {{
+                background-color: {t['surface2']};
+                color: {t['primary']};
+                border: 1px solid {t['primary']};
+                border-radius: 8px;
+                padding: 4px 10px;
+                font-size: 11px;
+                font-weight: bold;
+            }}
+            QPushButton:hover {{
+                background-color: {t['primary']};
+                color: #ffffff;
+            }}
+        """)
 
     def update_theme(self, theme: dict):
         self.theme = theme

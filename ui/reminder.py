@@ -1,10 +1,55 @@
 import re
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                               QLabel, QPushButton, QLineEdit,
-                              QScrollArea, QFrame)
+                              QScrollArea, QFrame, QDialog)
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
-from db import get_reminders, add_reminder, delete_reminder, toggle_reminder
+from db import get_reminders, add_reminder, delete_reminder, toggle_reminder, update_reminder
+
+
+class _EditDialog(QDialog):
+    def __init__(self, title: str, time: str, theme: dict, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("리마인더 수정")
+        self.setFixedWidth(360)
+        self.setModal(True)
+        t = theme
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(10)
+        self.title_input = QLineEdit(title)
+        self.time_input = QLineEdit(time)
+        self.time_input.setPlaceholderText("HH:MM")
+        btn_row = QHBoxLayout()
+        btn_row.addStretch()
+        cancel_btn = QPushButton("취소")
+        cancel_btn.setProperty("class", "secondary")
+        save_btn = QPushButton("저장")
+        cancel_btn.clicked.connect(self.reject)
+        save_btn.clicked.connect(self.accept)
+        btn_row.addWidget(cancel_btn)
+        btn_row.addWidget(save_btn)
+        layout.addWidget(QLabel("알림 내용"))
+        layout.addWidget(self.title_input)
+        layout.addWidget(QLabel("시각 (HH:MM)"))
+        layout.addWidget(self.time_input)
+        layout.addLayout(btn_row)
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {t['bg']}; }}
+            QLabel {{ color: {t['text']}; font-size: 11px; }}
+            QLineEdit {{
+                background: {t['surface']}; color: {t['text']};
+                border: 1px solid {t['border']}; border-radius: 6px; padding: 6px;
+            }}
+            QLineEdit:focus {{ border-color: {t['primary']}; }}
+            QPushButton {{
+                background: {t['primary']}; color: white; border: none;
+                border-radius: 6px; padding: 7px 18px; font-weight: bold;
+            }}
+            QPushButton:hover {{ background: {t['primary_hover']}; }}
+            QPushButton[class="secondary"] {{ background: {t['surface2']}; color: {t['text']}; }}
+            QPushButton[class="secondary"]:hover {{ background: {t['border']}; }}
+        """)
 from ui.utils import clear_layout
 
 
@@ -90,15 +135,18 @@ class ReminderWidget(QWidget):
             """)
             toggle.clicked.connect(lambda _, i=rid: self._toggle(i))
 
+            edit_btn = QPushButton("✏")
+            edit_btn.setFixedSize(24, 24)
+            edit_btn.setStyleSheet(f"""
+                QPushButton {{ background: transparent; color: {t['text_sub']}; border: none; padding: 0px; }}
+                QPushButton:hover {{ color: {t['primary']}; }}
+            """)
+            edit_btn.clicked.connect(lambda _, i=rid, tt=title, tm=time: self._edit(i, tt, tm))
+
             del_btn = QPushButton("✕")
             del_btn.setFixedSize(24, 24)
             del_btn.setStyleSheet(f"""
-                QPushButton {{
-                    background: transparent;
-                    color: {t['text_sub']};
-                    border: none;
-                    padding: 0px;
-                }}
+                QPushButton {{ background: transparent; color: {t['text_sub']}; border: none; padding: 0px; }}
                 QPushButton:hover {{ color: #ff6b8a; }}
             """)
             del_btn.clicked.connect(lambda _, i=rid: self._delete(i))
@@ -109,6 +157,7 @@ class ReminderWidget(QWidget):
             row.addWidget(title_lbl)
             row.addStretch()
             row.addWidget(toggle)
+            row.addWidget(edit_btn)
             row.addWidget(del_btn)
 
             container = QWidget()
@@ -145,6 +194,18 @@ class ReminderWidget(QWidget):
     def _toggle(self, rid: int):
         toggle_reminder(rid)
         self.refresh()
+
+    def _edit(self, rid: int, title: str, time: str):
+        dialog = _EditDialog(title, time, self.theme, self)
+        if dialog.exec():
+            new_title = dialog.title_input.text().strip()
+            new_time  = dialog.time_input.text().strip()
+            if not new_title or not new_time:
+                return
+            if not re.match(r'^\d{2}:\d{2}$', new_time):
+                return
+            update_reminder(rid, new_title, new_time)
+            self.refresh()
 
     def _delete(self, rid: int):
         delete_reminder(rid)

@@ -2,8 +2,18 @@ from datetime import date as date_type
 from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                               QPushButton, QScrollArea, QFrame, QTextEdit,
                               QDialog, QSizePolicy)
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt, pyqtSignal, QKeyCombination
+from PyQt6.QtGui import QFont, QKeyEvent
+
+
+class _MemoInput(QTextEdit):
+    submit = pyqtSignal()
+
+    def keyPressEvent(self, e: QKeyEvent):
+        if e.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter) and not e.modifiers() & Qt.KeyboardModifier.ShiftModifier:
+            self.submit.emit()
+        else:
+            super().keyPressEvent(e)
 from db import get_notes_for_date, add_note, update_note, delete_note_by_id
 
 
@@ -99,13 +109,14 @@ class MemoWidget(QWidget):
 
         input_row = QHBoxLayout()
         input_row.setSpacing(8)
-        self.input = QTextEdit()
-        self.input.setPlaceholderText("새 메모 입력...")
+        self.input = _MemoInput()
+        self.input.setPlaceholderText("새 메모 입력... (Enter로 추가, Shift+Enter 줄바꿈)")
+        self.input.submit.connect(self._add_note)
         self.input.setFont(QFont("NanumSquare Neo OTF", 11))
-        self.input.setFixedHeight(62)
+        self.input.setFixedHeight(72)
         self.input.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.add_btn = QPushButton("추가")
-        self.add_btn.setFixedSize(54, 62)
+        self.add_btn.setFixedSize(68, 72)
         self.add_btn.clicked.connect(self._add_note)
         input_row.addWidget(self.input)
         input_row.addWidget(self.add_btn)
@@ -130,6 +141,7 @@ class MemoWidget(QWidget):
                 padding: 6px;
             }}
             QTextEdit:focus {{ border-color: {t['primary']}; }}
+            QTextEdit {{ padding: 4px 6px; }}
         """)
         self.add_btn.setStyleSheet(f"""
             QPushButton {{
@@ -175,53 +187,46 @@ class MemoWidget(QWidget):
             QFrame#noteCard {{
                 background-color: {t['surface']};
                 border: 1px solid {t['border']};
-                border-radius: 10px;
+                border-radius: 8px;
             }}
         """)
 
-        v = QVBoxLayout(card)
-        v.setContentsMargins(14, 10, 10, 8)
-        v.setSpacing(6)
+        row = QHBoxLayout(card)
+        row.setContentsMargins(12, 6, 8, 6)
+        row.setSpacing(6)
 
         content_lbl = QLabel(content)
-        content_lbl.setWordWrap(True)
         content_lbl.setFont(QFont("NanumSquare Neo OTF", 11))
         content_lbl.setStyleSheet(f"color: {t['text']}; background: transparent; border: none;")
-        content_lbl.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         content_lbl.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
 
-        btn_row = QHBoxLayout()
-        btn_row.addStretch()
-
-        btn_style = f"""
+        edit_btn = QPushButton("수정")
+        del_btn  = QPushButton("삭제")
+        small_font = QFont("NanumSquare Neo OTF", 7)
+        for btn in (edit_btn, del_btn):
+            btn.setFixedHeight(24)
+            btn.setFixedWidth(44)
+            btn.setFont(small_font)
+        edit_btn.setStyleSheet(f"""
             QPushButton {{
-                background-color: transparent;
-                color: {t['text_sub']};
-                border: 1px solid {t['border']};
-                border-radius: 6px;
-                font-size: 11px;
+                background: transparent; color: {t['text_sub']};
+                border: 1px solid {t['border']}; border-radius: 5px; padding: 0px;
             }}
-            QPushButton:hover {{
-                background-color: {t['primary']};
-                color: white;
-                border-color: {t['primary']};
+            QPushButton:hover {{ background: {t['primary']}; color: white; border-color: {t['primary']}; }}
+        """)
+        del_btn.setStyleSheet(f"""
+            QPushButton {{
+                background: transparent; color: {t['text_sub']};
+                border: 1px solid {t['border']}; border-radius: 5px; padding: 0px;
             }}
-        """
-        edit_btn = QPushButton("✏")
-        edit_btn.setFixedSize(26, 26)
-        edit_btn.setStyleSheet(btn_style)
+            QPushButton:hover {{ background: #ff6b8a; color: white; border-color: #ff6b8a; }}
+        """)
         edit_btn.clicked.connect(lambda _, nid=note_id, c=content: self._edit_note(nid, c))
-
-        del_btn = QPushButton("✕")
-        del_btn.setFixedSize(26, 26)
-        del_btn.setStyleSheet(btn_style)
         del_btn.clicked.connect(lambda _, nid=note_id: self._delete_note(nid))
 
-        btn_row.addWidget(edit_btn)
-        btn_row.addWidget(del_btn)
-
-        v.addWidget(content_lbl)
-        v.addLayout(btn_row)
+        row.addWidget(content_lbl, 1)
+        row.addWidget(edit_btn)
+        row.addWidget(del_btn)
 
         return card
 

@@ -112,6 +112,11 @@ def delete_dday(did: int):
         conn.execute("DELETE FROM ddays WHERE id = ?", (did,))
 
 
+def update_dday(did: int, name: str, target_date: str):
+    with _get_conn() as conn:
+        conn.execute("UPDATE ddays SET name = ?, target_date = ? WHERE id = ?", (name, target_date, did))
+
+
 def get_memos_for_month(year: int, month: int) -> dict:
     with _get_conn() as conn:
         rows = conn.execute(
@@ -211,6 +216,11 @@ def add_reminder(title: str, time: str):
 def delete_reminder(rid: int):
     with _get_conn() as conn:
         conn.execute("DELETE FROM reminders WHERE id = ?", (rid,))
+
+
+def update_reminder(rid: int, title: str, time: str):
+    with _get_conn() as conn:
+        conn.execute("UPDATE reminders SET title = ?, time = ? WHERE id = ?", (title, time, rid))
 
 
 def toggle_reminder(rid: int):

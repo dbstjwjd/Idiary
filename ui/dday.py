@@ -4,8 +4,53 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout,
                               QScrollArea, QFrame)
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
-from db import get_ddays, add_dday, delete_dday
+from PyQt6.QtWidgets import QDialog, QVBoxLayout as _VBox, QHBoxLayout as _HBox
+from db import get_ddays, add_dday, delete_dday, update_dday
 from ui.utils import clear_layout
+
+
+class _EditDialog(QDialog):
+    def __init__(self, name: str, target: str, theme: dict, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("D-day 수정")
+        self.setFixedWidth(360)
+        self.setModal(True)
+        t = theme
+        layout = _VBox(self)
+        layout.setContentsMargins(16, 16, 16, 16)
+        layout.setSpacing(10)
+        self.name_input = QLineEdit(name)
+        self.date_input = QLineEdit(target)
+        btn_row = _HBox()
+        btn_row.addStretch()
+        cancel_btn = QPushButton("취소")
+        cancel_btn.setProperty("class", "secondary")
+        save_btn = QPushButton("저장")
+        cancel_btn.clicked.connect(self.reject)
+        save_btn.clicked.connect(self.accept)
+        btn_row.addWidget(cancel_btn)
+        btn_row.addWidget(save_btn)
+        layout.addWidget(QLabel("이름"))
+        layout.addWidget(self.name_input)
+        layout.addWidget(QLabel("날짜 (YYYY-MM-DD)"))
+        layout.addWidget(self.date_input)
+        layout.addLayout(btn_row)
+        self.setStyleSheet(f"""
+            QDialog {{ background-color: {t['bg']}; }}
+            QLabel {{ color: {t['text']}; font-size: 11px; }}
+            QLineEdit {{
+                background: {t['surface']}; color: {t['text']};
+                border: 1px solid {t['border']}; border-radius: 6px; padding: 6px;
+            }}
+            QLineEdit:focus {{ border-color: {t['primary']}; }}
+            QPushButton {{
+                background: {t['primary']}; color: white; border: none;
+                border-radius: 6px; padding: 7px 18px; font-weight: bold;
+            }}
+            QPushButton:hover {{ background: {t['primary_hover']}; }}
+            QPushButton[class="secondary"] {{ background: {t['surface2']}; color: {t['text']}; }}
+            QPushButton[class="secondary"]:hover {{ background: {t['border']}; }}
+        """)
 
 
 class DdayWidget(QWidget):
@@ -94,15 +139,19 @@ class DdayWidget(QWidget):
             d_lbl.setFont(QFont("NanumSquare Neo OTF", 13, QFont.Weight.Bold))
             d_lbl.setStyleSheet(f"color: {d_color}; border: none; background: transparent;")
 
+            btn_style = f"""
+                QPushButton {{ background: transparent; color: {t['text_sub']}; border: none; padding: 0px; }}
+                QPushButton:hover {{ color: {t['primary']}; }}
+            """
+            edit_btn = QPushButton("✏")
+            edit_btn.setFixedSize(24, 24)
+            edit_btn.setStyleSheet(btn_style)
+            edit_btn.clicked.connect(lambda _, i=did, n=name, d=target_str: self._edit(i, n, d))
+
             del_btn = QPushButton("✕")
             del_btn.setFixedSize(24, 24)
             del_btn.setStyleSheet(f"""
-                QPushButton {{
-                    background: transparent;
-                    color: {t['text_sub']};
-                    border: none;
-                    padding: 0px;
-                }}
+                QPushButton {{ background: transparent; color: {t['text_sub']}; border: none; padding: 0px; }}
                 QPushButton:hover {{ color: #ff6b8a; }}
             """)
             del_btn.clicked.connect(lambda _, i=did: self._delete(i))
@@ -117,6 +166,7 @@ class DdayWidget(QWidget):
             row.addLayout(info_col)
             row.addStretch()
             row.addWidget(d_lbl)
+            row.addWidget(edit_btn)
             row.addWidget(del_btn)
 
             container = QWidget()
@@ -146,6 +196,21 @@ class DdayWidget(QWidget):
             self.dday_changed.emit()
         except ValueError:
             self.date_input.setPlaceholderText("형식 오류! YYYY-MM-DD")
+
+    def _edit(self, did: int, name: str, target: str):
+        dialog = _EditDialog(name, target, self.theme, self)
+        if dialog.exec():
+            new_name = dialog.name_input.text().strip()
+            new_date = dialog.date_input.text().strip()
+            if not new_name or not new_date:
+                return
+            try:
+                datetime.strptime(new_date, "%Y-%m-%d")
+                update_dday(did, new_name, new_date)
+                self.refresh()
+                self.dday_changed.emit()
+            except ValueError:
+                pass
 
     def _delete(self, did: int):
         delete_dday(did)
