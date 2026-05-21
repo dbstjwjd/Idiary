@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Idiary — 사용 설명서</title>
+  <style>
+    :root {
+      --primary: #009CA6;
+      --primary-light: #e0f5f5;
+      --bg: #f7fafa;
+      --surface: #ffffff;
+      --border: #c8e8ea;
+      --text: #0a2e30;
+      --text-sub: #4a8a8e;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #009CA6 0%, #007a82 100%);
+      color: white;
+      padding: 56px 40px 48px;
+      text-align: center;
+    }
+    header h1 { font-size: 2.8rem; font-weight: 800; letter-spacing: -1px; }
+    header p  { font-size: 1.1rem; opacity: 0.88; margin-top: 10px; }
+
+    /* ── Nav ── */
+    nav {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      padding: 10px 20px;
+      flex-wrap: wrap;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    nav a {
+      color: var(--primary);
+      text-decoration: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background 0.15s;
+    }
+    nav a:hover { background: var(--primary-light); }
+
+    /* ── Layout ── */
+    .container { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    /* ── Section ── */
+    section { margin-bottom: 56px; }
+    section h2 {
+      font-size: 1.55rem;
+      font-weight: 800;
+      color: var(--primary);
+      border-left: 5px solid var(--primary);
+      padding-left: 14px;
+      margin-bottom: 24px;
+    }
+
+    /* ── Card grid ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 20px;
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .card:hover { box-shadow: 0 6px 20px rgba(0,156,166,0.12); transform: translateY(-2px); }
+    .card .icon { font-size: 1.9rem; margin-bottom: 10px; }
+    .card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 6px; }
+    .card p  { font-size: 0.9rem; color: var(--text-sub); line-height: 1.6; }
+
+    /* ── Step list ── */
+    .steps { counter-reset: step; display: flex; flex-direction: column; gap: 16px; }
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px 18px 66px;
+      position: relative;
+    }
+    .step::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 34px; height: 34px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+    }
+    .step h4 { font-size: 0.98rem; font-weight: 700; margin-bottom: 3px; }
+    .step p  { font-size: 0.88rem; color: var(--text-sub); }
+
+    /* ── Feature detail ── */
+    .feature-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+    .feature-block h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .feature-block ul {
+      padding-left: 20px;
+      font-size: 0.92rem;
+      color: #1a4a50;
+    }
+    .feature-block ul li { margin-bottom: 6px; }
+
+    /* ── Theme swatches ── */
+    .theme-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 12px;
+    }
+    .swatch {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    .swatch .color-bar { height: 44px; }
+    .swatch span { display: block; padding: 8px 4px; font-size: 0.82rem; font-weight: 600; background: var(--surface); }
+
+    /* ── Tip box ── */
+    .tip {
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      color: #0a4a50;
+      margin-top: 16px;
+    }
+    .tip strong { color: var(--primary); }
+
+    /* ── Shortcut table ── */
+    table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+    th { background: var(--primary); color: white; padding: 12px 16px; text-align: left; font-size: 0.92rem; }
+    td { padding: 11px 16px; font-size: 0.9rem; border-top: 1px solid var(--border); }
+    tr:hover td { background: var(--primary-light); }
+
+    /* ── Download ── */
+    .download-section {
+      background: linear-gradient(135deg, #009CA6 0%, #007a82 100%);
+      border-radius: var(--radius);
+      padding: 40px 32px;
+      text-align: center;
+      color: white;
+      margin-bottom: 56px;
+    }
+    .download-section h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: white;
+      border: none;
+      padding: 0;
+    }
+    .download-section p { opacity: 0.88; margin-bottom: 24px; font-size: 0.95rem; }
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: white;
+      color: #007a82;
+      font-weight: 800;
+      font-size: 1.05rem;
+      padding: 14px 32px;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    }
+    .download-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.22); }
+    .version-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 0.82rem;
+      margin-bottom: 20px;
+    }
+    .release-note {
+      margin-top: 16px;
+      font-size: 0.82rem;
+      opacity: 0.75;
+    }
+    .release-note a { color: white; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 32px;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📅 Idiary</h1>
+  <p>개인 일정 관리 데스크탑 앱 — 사용 설명서</p>
+</header>
+
+<nav>
+  <a href="#download">⬇ 다운로드</a>
+  <a href="#overview">개요</a>
+  <a href="#quickstart">빠른 시작</a>
+  <a href="#features">기능 설명</a>
+  <a href="#settings">설정</a>
+  <a href="#data">데이터 관리</a>
+  <a href="#tips">팁</a>
+</nav>
+
+<div class="container">
+
+  <!-- ── 다운로드 ── -->
+  <section id="download">
+    <div class="download-section">
+      <h2>⬇ Idiary 다운로드</h2>
+      <div class="version-badge">Windows 10 / 11 · 64bit</div>
+      <p>설치 없이 바로 실행 가능한 단일 실행 파일입니다.</p>
+      <a class="download-btn"
+         href="https://github.com/dbstjwjd/Idiary/releases/latest/download/Idiary.exe">
+        ⬇ &nbsp;Idiary.exe 다운로드
+      </a>
+      <div class="release-note">
+        전체 릴리즈 목록 · 이전 버전은
+        <a href="https://github.com/dbstjwjd/Idiary/releases">GitHub Releases</a>
+        에서 확인할 수 있습니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 개요 ── -->
+  <section id="overview">
+    <h2>앱 개요</h2>
+    <div class="card-grid">
+      <div class="card">
+        <div class="icon">📝</div>
+        <h3>메모</h3>
+        <p>날짜별로 메모를 카드 형식으로 여러 개 등록하고 개별 수정·삭제할 수 있습니다.</p>
+      </div>
+      <div class="card">
+        <div class="icon">📅</div>
+        <h3>D-day</h3>
+        <p>기념일·시험·여행 등 중요한 날까지 남은 날 수를 실시간으로 확인합니다.</p>
+      </div>
+      <div class="card">
+        <div class="icon">⏰</div>
+        <h3>리마인더</h3>
+        <p>매일 지정한 시각에 알림이 울려 중요한 일을 놓치지 않게 합니다.</p>
+      </div>
+      <div class="card">
+        <div class="icon">✅</div>
+        <h3>TODO</h3>
+        <p>주 단위로 할 일을 관리하고 완료 체크할 수 있습니다.</p>
+      </div>
+      <div class="card">
+        <div class="icon">📊</div>
+        <h3>통계</h3>
+        <p>월별 할일 완료율을 그래프로 한눈에 확인할 수 있습니다.</p>
+      </div>
+      <div class="card">
+        <div class="icon">🎨</div>
+        <h3>7가지 테마</h3>
+        <p>IDIS, Dark, Light, Sky, Blossom, Mint, 고양이 테마 중 선택할 수 있습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 빠른 시작 ── -->
+  <section id="quickstart">
+    <h2>빠른 시작</h2>
+    <div class="steps">
+      <div class="step">
+        <h4>앱 실행</h4>
+        <p>Idiary.exe 를 더블클릭하거나 <code>python main.py</code>로 실행합니다.</p>
+      </div>
+      <div class="step">
+        <h4>날짜 클릭</h4>
+        <p>달력에서 원하는 날짜를 클릭하면 오른쪽 메모 탭에 해당 날짜의 메모가 표시됩니다.</p>
+      </div>
+      <div class="step">
+        <h4>메모 추가</h4>
+        <p>메모 탭 하단 입력창에 내용을 입력하고 <strong>추가</strong> 버튼을 누릅니다.</p>
+      </div>
+      <div class="step">
+        <h4>사이드바로 기능 전환</h4>
+        <p>오른쪽 사이드바의 아이콘 버튼으로 메모 / D-day / 알림 / 통계 / TODO 탭을 전환합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 기능 설명 ── -->
+  <section id="features">
+    <h2>기능 설명</h2>
+
+    <div class="feature-block">
+      <h3>📅 달력</h3>
+      <ul>
+        <li><strong>단일 클릭</strong> — 날짜를 선택하고 해당 날짜의 메모를 오른쪽 패널에 표시합니다.</li>
+        <li><strong>더블 클릭</strong> — 동일하게 날짜를 선택합니다.</li>
+        <li>메모가 있는 날짜에는 <strong>점(•)</strong> 이 표시됩니다.</li>
+        <li>D-day로 등록한 날짜에는 이름이 달력 안에 표시됩니다.</li>
+        <li>◀ ▶ 버튼으로 월을 이동합니다.</li>
+        <li>달력과 오른쪽 패널 사이 구분선을 <strong>드래그</strong>해서 가로 비율을 조절할 수 있습니다.</li>
+      </ul>
+    </div>
+
+    <div class="feature-block">
+      <h3>📝 메모</h3>
+      <ul>
+        <li>날짜별로 <strong>여러 개의 메모</strong>를 카드 형식으로 추가할 수 있습니다.</li>
+        <li>카드 오른쪽 하단의 <strong>✏ 버튼</strong>으로 내용을 수정합니다.</li>
+        <li><strong>✕ 버튼</strong>으로 해당 메모 카드를 삭제합니다.</li>
+        <li>하단 입력창에 내용을 입력 후 <strong>추가</strong> 버튼을 누르면 새 카드가 생성됩니다.</li>
+      </ul>
+    </div>
+
+    <div class="feature-block">
+      <h3>📅 D-day</h3>
+      <ul>
+        <li>이름과 날짜(YYYY-MM-DD)를 입력하고 <strong>추가</strong>를 누릅니다.</li>
+        <li>목록에서 남은 날 수 / D-Day / 지난 날 수가 자동 계산되어 표시됩니다.</li>
+        <li>D-day가 3일 이내로 다가오면 앱 시작 시 <strong>알림 팝업</strong>이 표시됩니다.</li>
+        <li>삭제 버튼(✕)으로 개별 삭제합니다.</li>
+      </ul>
+    </div>
+
+    <div class="feature-block">
+      <h3>⏰ 리마인더</h3>
+      <ul>
+        <li>알림 내용과 시각(HH:MM)을 입력하고 <strong>추가</strong>를 누릅니다.</li>
+        <li>지정한 시각이 되면 화면 우측 하단에 <strong>토스트 알림</strong>이 표시됩니다.</li>
+        <li>토글 버튼으로 알림을 <strong>켜거나 끌</strong> 수 있습니다.</li>
+        <li>같은 알림은 하루에 한 번만 울립니다. (앱 실행 중에만 작동)</li>
+      </ul>
+    </div>
+
+    <div class="feature-block">
+      <h3>✅ TODO</h3>
+      <ul>
+        <li>오른쪽 사이드바의 <strong>✅ TODO</strong> 탭에서 할 일을 관리합니다.</li>
+        <li>상단 요일 버튼으로 날짜를 선택하고, 입력창에 할 일을 입력 후 <strong>Enter</strong>로 추가합니다.</li>
+        <li>체크박스를 클릭하면 완료 처리되며, 통계 탭의 완료율이 즉시 반영됩니다.</li>
+        <li>◁ ▷ 버튼으로 주를 이동합니다.</li>
+        <li>미완료 할 일이 있으면 앱 시작 시 알림이 표시됩니다.</li>
+      </ul>
+    </div>
+
+    <div class="feature-block">
+      <h3>📊 통계</h3>
+      <ul>
+        <li>월별 할 일 전체 개수와 완료 개수, <strong>완료율</strong>을 보여줍니다.</li>
+        <li>TODO를 완료/삭제하면 즉시 통계에 반영됩니다.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ── 설정 ── -->
+  <section id="settings">
+    <h2>설정</h2>
+
+    <div class="feature-block">
+      <h3>🎨 테마</h3>
+      <div class="theme-grid" style="margin-top:12px;">
+        <div class="swatch"><div class="color-bar" style="background:#009CA6;"></div><span>🏢 IDIS</span></div>
+        <div class="swatch"><div class="color-bar" style="background:#1e1e2e;"></div><span>🌙 Dark</span></div>
+        <div class="swatch"><div class="color-bar" style="background:#7b8cff;"></div><span>☀️ Light</span></div>
+        <div class="swatch"><div class="color-bar" style="background:#4db8e8;"></div><span>☁ Sky</span></div>
+        <div class="swatch"><div class="color-bar" style="background:#ff80b0;"></div><span>🌸 Blossom</span></div>
+        <div class="swatch"><div class="color-bar" style="background:#3dcc88;"></div><span>🌿 Mint</span></div>
+        <div class="swatch"><div class="color-bar" style="background:#ff8c69;"></div><span>🐱 고양이</span></div>
+      </div>
+      <p style="margin-top:12px; font-size:0.9rem; color:var(--text-sub);">상단 메뉴 → 설정 → 🎨 테마에서 변경합니다. 선택한 테마는 자동 저장됩니다.</p>
+    </div>
+
+    <div class="feature-block">
+      <h3>🔤 폰트 설정</h3>
+      <ul>
+        <li>설정 → 🔤 폰트 설정에서 서체와 크기를 변경합니다.</li>
+        <li>앱 전체 텍스트에 즉시 적용됩니다.</li>
+      </ul>
+    </div>
+
+    <div class="feature-block">
+      <h3>🔆 투명도</h3>
+      <ul>
+        <li>설정 → 🔆 투명도에서 50% ~ 100% 사이로 창 투명도를 조절합니다.</li>
+      </ul>
+    </div>
+
+    <div class="feature-block">
+      <h3>📌 항상 위에 고정</h3>
+      <ul>
+        <li>다른 창 위에 항상 표시합니다. 설정 메뉴에서 체크로 켜고 끕니다.</li>
+        <li>바탕화면 고정 모드와 동시에 사용할 수 없습니다.</li>
+      </ul>
+    </div>
+
+    <div class="feature-block">
+      <h3>🖥️ 바탕화면에 고정</h3>
+      <ul>
+        <li>창 프레임이 없어지고 바탕화면에 붙어있는 위젯처럼 표시됩니다.</li>
+        <li>창 가장자리를 드래그해서 크기를 조절하고, 내부를 드래그해서 위치를 이동합니다.</li>
+        <li>우클릭 메뉴로 설정을 열거나 고정을 해제할 수 있습니다.</li>
+      </ul>
+      <div class="tip"><strong>TIP</strong> — 바탕화면 고정 모드에서는 상단 메뉴바가 숨겨집니다. 우클릭 → 설정 열기로 접근하세요.</div>
+    </div>
+  </section>
+
+  <!-- ── 데이터 관리 ── -->
+  <section id="data">
+    <h2>데이터 관리</h2>
+
+    <div class="feature-block">
+      <h3>📤 데이터 내보내기</h3>
+      <ul>
+        <li>설정 → 📤 데이터 내보내기를 클릭합니다.</li>
+        <li>저장 위치를 선택하면 <strong>JSON 파일</strong>로 백업됩니다.</li>
+        <li>메모, 할일, D-day, 리마인더 데이터가 모두 포함됩니다.</li>
+      </ul>
+    </div>
+
+    <div class="feature-block">
+      <h3>📥 데이터 가져오기</h3>
+      <ul>
+        <li>설정 → 📥 데이터 가져오기를 클릭합니다.</li>
+        <li>기존에 내보낸 JSON 파일을 선택합니다.</li>
+        <li><strong>주의</strong> — 기존 데이터가 모두 덮어씌워집니다. 가져오기 전에 먼저 내보내기로 백업하세요.</li>
+      </ul>
+      <div class="tip"><strong>데이터 저장 위치</strong> — 실행 파일(.exe)과 같은 폴더의 <code>diary.db</code> 파일에 저장됩니다.</div>
+    </div>
+  </section>
+
+  <!-- ── 팁 ── -->
+  <section id="tips">
+    <h2>팁 & 단축키</h2>
+
+    <table>
+      <thead>
+        <tr><th>동작</th><th>방법</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>날짜 선택 및 메모 확인</td><td>달력에서 날짜 클릭</td></tr>
+        <tr><td>패널 비율 조절</td><td>달력과 오른쪽 패널 사이 구분선 드래그</td></tr>
+        <tr><td>메모 추가</td><td>입력창 작성 후 추가 버튼 클릭</td></tr>
+        <tr><td>TODO 추가</td><td>입력창 작성 후 Enter</td></tr>
+        <tr><td>D-day / 리마인더 추가</td><td>입력 후 추가 버튼 또는 Enter</td></tr>
+        <tr><td>바탕화면 고정 해제</td><td>우클릭 → 바탕화면 고정 해제</td></tr>
+        <tr><td>테마 변경</td><td>메뉴바 → 설정 → 🎨 테마</td></tr>
+        <tr><td>데이터 백업</td><td>메뉴바 → 설정 → 📤 데이터 내보내기</td></tr>
+      </tbody>
+    </table>
+
+    <div class="tip" style="margin-top:20px;">
+      <strong>알림 기능 주의사항</strong> — 리마인더는 앱이 실행 중일 때만 작동합니다. 앱을 종료하면 알림이 울리지 않습니다.
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  Idiary &copy; 2025 &nbsp;|&nbsp; PyQt6 기반 데스크탑 앱
+</footer>
+
+</body>
+</html>
