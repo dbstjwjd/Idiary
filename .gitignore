@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# PyInstaller
+build/
+dist/
+
+# 사용자 데이터
+diary.db
+config.json
+*.json
+
+# 기타
+*.log
+.idea/
+.vscode/
